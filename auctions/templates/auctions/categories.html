@@ -6,7 +6,7 @@
         {% for category in categories %}
             <div>
                 <li>
-                    <a href="{% url 'index' %}">{{ category }}</a>
+                    <a href="{% url 'category_listings' category.name %}">{{ category }}</a>
                 </li>
             </div>
             <hr>
