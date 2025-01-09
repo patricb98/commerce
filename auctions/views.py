@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -66,6 +66,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+
 @login_required
 def create_listing(request):
     if request.method == "POST":
@@ -80,3 +81,29 @@ def create_listing(request):
     else:
         form = ListingForm()
     return render(request, "auctions/create_listing.html", {"form": form})
+
+
+def categories(request):
+    categories = Category.objects.all()
+    return render(request, "auctions/categories.html", {"categories": categories})
+
+
+def listing_page(request, listing_id):
+    listing = get_object_or_404(Listing, pk=listing_id)
+    return render(request, "auctions/listing_page.html", {"listing": listing})
+
+@login_required
+def watchlist(request):
+    listings = request.user.watchlist.all()
+    return render(request, "auctions/watchlist.html", {"listings": listings})
+
+@login_required
+def add_to_watchlist(request, listing_id):
+    listing = get_object_or_404(Listing, pk=listing_id)
+    
+    if request.user in listing.watchlist.all():
+        listing.watchlist.remove(request.user)
+    else:
+        listing.watchlist.add(request.user)
+    return HttpResponseRedirect(reverse("listing_page", args=[listing_id]))
+    
